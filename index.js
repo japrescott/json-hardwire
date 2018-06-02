@@ -208,6 +208,7 @@ const $asInteger = (function() {
 			if (isLong(i)) {
 				return i.toString();
 			}
+			return $asNumber(i);
 		};
 	} else {
 		return function $asInteger(i) {
@@ -242,15 +243,15 @@ function $asHardString(str) {
 }
 
 function $asBoolean(bool) {
-	return (bool && "true") || "false"; // eslint-disable-line
+	return bool && "true" || "false"; // eslint-disable-line
 }
 
 function $asString(str) {
 	if (typeof str !== "string") {
-		if (str instanceof Date) {
-			return `"${str.toISOString()}"`;
-		} else if (str === null) {
+		if (str === null || str === undefined) {
 			return '""';
+		} else if (str instanceof Date) {
+			return `"${str.toISOString()}"`;
 		} else if (str instanceof RegExp) {
 			str = str.source;
 		} else {
@@ -298,8 +299,8 @@ function addPatternProperties(schema, externalSchema, fullSchema) {
 
 	var pp = schema.patternProperties;
 	var code = `
-			const properties = ${JSON.stringify(schema.properties)} || {};
-			const keys = Object.keys(obj);
+			let properties = ${JSON.stringify(schema.properties)} || {};
+			let keys = Object.keys(obj);
 			for (var i = 0; e=keys.length; i<e; i++) {
 				if (properties[keys[i]]) continue;
 	`;
@@ -499,6 +500,7 @@ function buildCode(schema, code, laterCode, name, externalSchema, fullSchema) {
 
 
 	let requiredOutputted = false;
+	let needsWrap = false;
 
 	Object.keys(schema.properties || {}).forEach((key, i, a) => {
 		if (schema.properties[key]["$ref"]) {
@@ -558,8 +560,13 @@ function buildCode(schema, code, laterCode, name, externalSchema, fullSchema) {
 					if (rendered) {
 			`;
 		} else {*/
+
+
+
+			needsWrap = ( schema.required && schema.required.indexOf(key) !== -1 ) || defaultValue || optional;
+
 				
-			if (defaultValue || optional){
+			if ( needsWrap ){
 				code += `
 						if (obj['${key}'] !== undefined) {
 							addComma=true;
@@ -594,18 +601,18 @@ function buildCode(schema, code, laterCode, name, externalSchema, fullSchema) {
 			laterCode = result.laterCode;
 			
 
-			if (defaultValue || optional){
+			if (needsWrap){
 				code += `
 					}
 				`;
 			}
 
-		// }
+		//}
 
 		
 		if (defaultValue !== undefined) {
 			code += `
-			} else {
+			else {
 				`
 			if (requiredOutputted){
 				code += `	
@@ -622,7 +629,7 @@ function buildCode(schema, code, laterCode, name, externalSchema, fullSchema) {
 			}`;
 		} else if (schema.required && schema.required.indexOf(key) !== -1) {
 			code += `
-			} else {
+			else {
 				throw new Error('${key} is required!');
 			}`;
 		}
@@ -955,7 +962,7 @@ function nested(
 			break;
 
 		case "object":
-			funcName = (name + key + subKey).replace(/[-.\[\] ]/g, ""); // eslint-disable-line
+			funcName = (name + key + subKey).replace(/[-.\[\], ]/gmi, ""); // eslint-disable-line
 			laterCode = buildObject(
 				schema,
 				laterCode,
@@ -965,10 +972,12 @@ function nested(
 			);
 			code += `
 				json += ${funcName}(obj${accessor});
+
+				// nested.object
 			`;
 			break;
 		case "array":
-			funcName = (name + key + subKey).replace(/[-.\[\] ]/g, ""); // eslint-disable-line
+			funcName = (name + key + subKey).replace(/[-.\[\], ]/gmi, ""); // eslint-disable-line
 			laterCode = buildArray(
 				schema,
 				laterCode,
@@ -978,16 +987,18 @@ function nested(
 			);
 			code += `
 				json += ${funcName}(obj${accessor});
+
+				// nested.array
 			`;
 			break;
 		case undefined:
 			if ("anyOf" in schema) {
-				funcName = (name + key + subKey).replace(/[-.\[\] ]/g, ""); // eslint-disable-line
+				// funcName = (name + key + subKey).replace(/[-.\[\], ]/gmi, ""); // eslint-disable-line
 				schema.anyOf.forEach((s, index) => {
 					var nestedResult = nested(
 						laterCode,
 						name,
-						funcName,
+						key,
 						s,
 						externalSchema,
 						fullSchema,
@@ -1004,40 +1015,40 @@ function nested(
 					laterCode = nestedResult.laterCode;
 				});
 				code += `
-					else json+= null;
+					else json+= null; // nested.anyOf
 				`;
 			} else throw new Error(`${schema} unsupported`);
 			break;
 		default:
 			if (Array.isArray(type)) {
-				funcName = (name + key + subKey).replace(/[-.\[\] ]/g, ""); // eslint-disable-line
+				// funcName = (name + key + subKey).replace(/[-.\[\], ]/gmi, ""); // eslint-disable-line
 				type.forEach((type, index) => {
 					var tempSchema = { type: type };
 					var nestedResult = nested(
 						laterCode,
 						name,
-						funcName,
+						key,
 						tempSchema,
 						externalSchema,
 						fullSchema,
 						subKey
 					);
 					if (type === "string") {
-						// ${index === 0 ? 'if' : 'else if'}(obj${accessor} instanceof Date || ajv.validate(${require('util').inspect(tempSchema, { depth: null })}, obj${accessor}))
 						code += `
+							${index === 0 ? 'if' : 'else if'}(obj${accessor} instanceof Date || ${buildArrayTypeCondition(type, accessor)} )
 								${nestedResult.code}
 						`;
 					} else {
-						// ${index === 0 ? 'if' : 'else if'}(ajv.validate(${require('util').inspect(tempSchema, { depth: null })}, obj${accessor}))
 						code += `
+							${index === 0 ? 'if' : 'else if'}( ${buildArrayTypeCondition(type, accessor)} )
 							${nestedResult.code}
 						`;
 					}
 					laterCode = nestedResult.laterCode;
 				});
-				/*code += `
-					else json+= null
-				`*/
+				code += `
+					else json+= null; // nested.isArray
+				`
 			} else {
 				throw new Error(`${type} unsupported`);
 			}
