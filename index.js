@@ -50,6 +50,7 @@ function build(schema, options) {
 		${$asHardFloat.toString()}
 		${$asHardDate.toString()}
 		${$asHardString.toString()}
+		${$asHardJSONEncoded.toString()}		
 	`;
 
 	// only handle longs if the module is used
@@ -67,62 +68,86 @@ function build(schema, options) {
 	var hasShemaSomeIf = hasIf(schema);
 
 	var main;
+	var oneLevelDeepToString=false;
 
 	switch (schema.type) {
 		case "object":
 			main = "$main";
 			code = buildObject(schema, code, main, options.schema, schema);
 			break;
+		case "array":
+			main = "$main";
+			code = buildArray(schema, code, main, options.schema, schema);
+			break;
 		case "string":
 			main = $asString.name;
 			break;
 		case "integer":
 			main = $asInteger.name;
+			oneLevelDeepToString= true;
 			break;
 		case "number":
 			main = $asNumber.name;
+			oneLevelDeepToString= true;
 			break;
 		case "boolean":
 			main = $asBoolean.name;
+			oneLevelDeepToString= true;
 			break;
 		case "null":
 			main = $asNull.name;
+			oneLevelDeepToString= true;
 			break;
 
 		case "hardInt":
-			main = $asHardInt.
+			main = $asHardInt.name;
+			oneLevelDeepToString= true;
 			break;
 		case "hardFloat":
 			main = $asHardFloat.name;
+			oneLevelDeepToString= true;
 			break;
 		case "hardDate":
 			main = $asHardDate.name;
+			oneLevelDeepToString= true;
 			break;
 		case "hardString":
 			main = $asHardString.name;
+			oneLevelDeepToString= true;
 			break;
 
-		case "array":
-			main = "$main";
-			code = buildArray(schema, code, main, options.schema, schema);
+		case "hardJSONEncoded":
+			main = $asHardJSONEncoded.name;
+			oneLevelDeepToString= true;
 			break;
+
 		default:
 			throw new Error(`${schema.type} unsupported`);
 	}
 
-	code += `
+
+	if (!oneLevelDeepToString){
+
+		code += `
 		;
-		return flatstr(${main});
-	`;
+		return flatstr(${main})`;
+	}
+	else {
+		code += `
+		;
+		return function(str){
+			return flatstr(${main}(str)${oneLevelDeepToString?"+''":""});
+		}`;
+	}
 
 
 
 	console.log( "Final Code:", code );
 
-
 	if (options.uglify) {
 		code = uglifyCode(code);
 	}
+
 
 	var dependencies = [];
 	var dependenciesName = [];
@@ -236,6 +261,10 @@ function $asHardFloat(f) {
 
 function $asHardDate(d) {
 	return `"${d.toISOString()}"`;
+}
+
+function $asHardJSONEncoded(str) {
+	return str;
 }
 
 function $asHardString(str) {
@@ -960,6 +989,12 @@ function nested(
 				json += $asHardString(obj${accessor});
 			`;
 			break;
+		case "hardJSONEncoded":
+			code += `
+				json += $asHardJSONEncoded(obj${accessor});
+			`;
+			break;
+			
 
 		case "object":
 			funcName = (name + key + subKey).replace(/[-.\[\], ]/gmi, ""); // eslint-disable-line

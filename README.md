@@ -13,6 +13,7 @@ Unforgiving types:
  * `'hardInt'`
  * `'hardFloat'`
  * `'hardDate'`
+ * `'hardJSONEncoded'`
 
 
 
