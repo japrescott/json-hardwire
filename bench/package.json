@@ -1,0 +1,25 @@
+{
+  "name": "json-hardwire",
+  "version": "0.1.0",
+  "description": "Stringify your JSON at max speed by hardwiring your schema",
+  "main": "index.js",
+  "scripts": {
+    "benchmark": "node bench.js"
+  },
+  "precommit": "test",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/japrescott/json-hardwire.git"
+  },
+  "keywords": [],
+  "author": "Jeremy A. Prescott <jap@prescore.ch>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/japrescott/json-hardwire/issues"
+  },
+  "homepage": "https://github.com/japrescott/json-hardwire#readme",
+  "devDependencies": {},
+  "dependencies": {
+    "fast-json-stringify": "x.x.x"
+  }
+}
