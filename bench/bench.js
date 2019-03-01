@@ -417,7 +417,9 @@ suites.object.add('json-fastify-json obj', function () {
 
 
 
-
+function getHz(bench) {
+	return 1 / (bench.stats.mean + bench.stats.moe);
+}
 
 async function run(suite){
 	return new Promise( (resolve, reject) => {
@@ -430,9 +432,24 @@ async function run(suite){
 			console.log("%s", String(event.target));
 		})
 		.on('complete', function () {
-			console.log(`Fastest is ${this.filter('fastest').map('name')}
+
+			let fastest = this.filter('fastest');
+			let slowest = this.filter('slowest');
+
+
+			let fastestHz = getHz(fastest[0]);
+
+			
+			console.log(`Fastest is ${fastest.map('name')}
 			`);
-			//console.log(`Fastest is ${ JSON.stringify(this.filter('fastest') ) }`);
+
+
+			let hz = getHz(slowest[0]),
+			percent = (1 - (hz / fastestHz)) * 100;
+
+			console.log(`slowest is ${slowest.map('name')} is ${percent} slower`);
+			
+			//console.log(`Fastest is ${ JSON.stringify(fastest ) }`);
 			resolve();	
 		})
 		.run({async:true});
