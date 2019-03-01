@@ -937,7 +937,7 @@ function nested(
 	var code = "";
 	var funcName;
 	var type = schema.type;
-	var accessor = key.indexOf("[") === 0 ? key : `['${key}']`;
+	var accessor = key[0]==='[' ? key : `['${key}']`;
 
 
 	subKey = subKey || '_';

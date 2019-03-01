@@ -6,18 +6,104 @@ const jsonFastify = require("fast-json-stringify")
 const benchmark = require('benchmark')
 
 const schema = {
-	'title': 'Example Schema',
-	'type': 'object',
-	'properties': {
-		'firstName': {
-			'type': 'string'
+	title: 'Example Schema',
+	type: 'object',
+	properties: {
+		firstName: {
+			type: 'string'
 		},
-		'lastName': {
-			'type': 'string'
+		lastName: {
+			type: 'string'
 		},
-		'age': {
-			'description': 'Age in years',
-			'type': 'integer'
+		age: {
+			description: 'Age in years',
+			type: 'integer'
+		}
+	}
+}
+const schemaHard = {
+	title: 'Example Schema',
+	type: 'object',
+	properties: {
+		firstName: {
+			type: 'hardString'
+		},
+		lastName: {
+			type: 'hardString'
+		},
+		age: {
+			description: 'Age in years',
+			type: 'hardInt'
+		}
+	}
+}
+
+const schemaComplex = {
+	title: 'Example Complex Schema',
+	type: 'object',
+	properties: {
+		firstName: {
+			type: 'string'
+		},
+		lastName: {
+			type: 'string'
+		},
+		age: {
+			description: 'Age in years',
+			type: 'integer'
+		},
+		houses: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					street: {type:'string'},
+					nr: {type:'number'},
+					city: {type:'string'},
+					lat: {type:'number'},
+					long: {type:'number'}
+				}
+			}
+		}
+	}
+}
+
+const schemaComplexHard = {
+	title: 'Example Complex Schema',
+	type: 'object',
+	properties: {
+		firstName: {
+			type: 'hardString'
+		},
+		lastName: {
+			type: 'hardString'
+		},
+		age: {
+			description: 'Age in years',
+			type: 'hardInt'
+		},
+		accounts: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					iban: {type:'hardString'},
+					ccy: {type:'hardString'}
+				}
+			}
+		},
+		houses: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					street: {type:'hardString'},
+					nr: {type:'hardInt'},
+					city: {type:'hardString'},
+					lat: {type:'hardFloat'},
+					long: {type:'hardFloat'}
+				}
+			}
 		}
 	}
 }
@@ -30,15 +116,87 @@ const arraySchema = {
 	items: schema
 }
 
+const arraySchemaHard = {
+	title: 'array schema hard',
+	type: 'array',
+	items: schemaHard
+}
 
+
+const arraySchemaComplex = {
+	title: 'array complex schema',
+	type: 'array',
+	items: schemaComplex
+}
+
+const arraySchemaComplexHard = {
+	title: 'array complex schema hard',
+	type: 'array',
+	items: schemaComplexHard
+}
+
+
+
+
+
+
+//Prepare DataSets..
 const obj = {
 	firstName: 'Matteo',
 	lastName: 'Collina',
 	age: 32
 }
 
+const objComplex = {
+	firstName: 'Matteo',
+	lastName: 'Collina',
+	age: 32,
+	accounts: [
+		{
+			iban: 'CH56 0483 5012 3456 7800 9',
+			ccy: 'CHF'
+		},
+		{
+			iban: 'CH56 0483 5012 3456 7800 8',
+			ccy: 'EUR'
+		}
+	],
+	houses: [
+		{
+			name: 'House 1',
+			location: {
+				street: 'Bhfstrasse',
+				nr: 1,
+				city: 'Zurich',
+				lat: 47.36667,
+				long: 8.55
+			}
+		},
+		{
+			name: 'House 2',
+			location: {
+				street: 'Bhfstrasse',
+				nr: 1,
+				city: 'Zurich',
+				lat: 47.36667,
+				long: 8.55
+			}
+		},
+		{
+			name: 'House 3',
+			location: {
+				street: 'Bhfstrasse',
+				nr: 1,
+				city: 'Zurich',
+				lat: 47.36667,
+				long: 8.55
+			}
+		}
+	]
+}
 
-const objBig = {
+
+const objLongString = {
 	firstName: 'MatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteoMatteo',
 	lastName: 'CollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollinaCollina',
 	age: 32
@@ -47,10 +205,11 @@ const objBig = {
 
 
 const multiArray = []
-const multiArrayBig = []
+const multiArrayLongString = []
+const multiArrayComplex = []
 
 
-//Prepare DataSets..
+
 var str = ''
 
 for (var i = 0; i < 10000; i++) {
@@ -63,21 +222,25 @@ for (var i = 0; i < 10000; i++) {
 
 for (i = 0; i < 1000; i++) {
 	multiArray.push(obj)
-	multiArrayBig.push(objBig)
+	multiArrayLongString.push(objLongString)
+	multiArrayComplex.push(objComplex)
 }
 
 
 
 // prepare schemas
 const HWSchema = {
-	stringify:  HW(schema),
-	stringifyUgly:  HW(schema, { uglify: true }),
+	stringify:  HW(schemaHard),
+	stringifyUgly:  HW(schemaHard, { uglify: true }),
 	
-	stringifyArray:  HW(arraySchema),
-	stringifyArrayUgly:  HW(arraySchema, { uglify: true }),
+	stringifyArray:  HW(arraySchemaHard),
+	stringifyArrayUgly:  HW(arraySchemaHard, { uglify: true }),
+
+	stringifyArrayComplex:  HW(arraySchemaComplexHard),
+	stringifyArrayComplexUgly:  HW(arraySchemaComplexHard, { uglify: true }),
 	
-	stringifyString:  HW({ type: 'string' }),
-	stringifyStringUgly:  HW({ type: 'string', uglify: true })
+	stringifyString:  HW({ type: 'hardString' }),
+	stringifyStringUgly:  HW({ type: 'hardString', uglify: true })
 };
 
 
@@ -87,6 +250,9 @@ const fastifySchema = {
 	
 	stringifyArray:  jsonFastify(arraySchema),
 	stringifyArrayUgly:  jsonFastify(arraySchema, { uglify: true }),
+
+	stringifyArrayComplex:  jsonFastify(arraySchemaComplex),
+	stringifyArrayComplexUgly:  jsonFastify(arraySchemaComplex, { uglify: true }),
 	
 	stringifyString:  jsonFastify({ type: 'string' }),
 	stringifyStringUgly:  jsonFastify({ type: 'string', uglify: true })
@@ -119,40 +285,64 @@ suites.array.add('json-hardwire array', function () {
 	HWSchema.stringifyArray(multiArray)
 })
 
-suites.array.add('json-hardwire-uglified array', function () {
+/*suites.array.add('json-hardwire-uglified array', function () {
 	HWSchema.stringifyArrayUgly(multiArray)
-})
+})*/
 
 suites.array.add('json-fastify-json array', function () {
 	fastifySchema.stringifyArray(multiArray)
 })
 
-suites.array.add('json-fastify-json-uglified array', function () {
+/*suites.array.add('json-fastify-json-uglified array', function () {
 	fastifySchema.stringifyArrayUgly(multiArray)
+})*/
+
+
+
+suites.arrayBig = new benchmark.Suite('arrayLongString');
+suites.arrayBig.add('JSON.stringify longString array', function () {
+	JSON.stringify(multiArrayLongString)
 })
 
-
-
-suites.arrayBig = new benchmark.Suite('arrayBig');
-suites.arrayBig.add('JSON.stringify BIG array', function () {
-	JSON.stringify(multiArrayBig)
+suites.arrayBig.add('json-hardwire longString array', function () {
+	HWSchema.stringifyArray(multiArrayLongString)
 })
 
-suites.arrayBig.add('json-hardwire BIG array', function () {
-	HWSchema.stringifyArray(multiArrayBig)
+/*suites.arrayBig.add('json-hardwire-uglified longString array', function () {
+	HWSchema.stringifyArrayUgly(multiArrayLongString)
+})*/
+
+suites.arrayBig.add('json-fastify-json longString array', function () {
+	fastifySchema.stringifyArray(multiArrayLongString)
 })
 
-suites.arrayBig.add('json-hardwire-uglified BIG array', function () {
-	HWSchema.stringifyArrayUgly(multiArrayBig)
+/*suites.arrayBig.add('json-fastify-json-uglified longString array', function () {
+	fastifySchema.stringifyArrayUgly(multiArrayLongString)
+})*/
+
+
+
+
+suites.arrayComplex = new benchmark.Suite('arrayComplex');
+suites.arrayComplex.add('JSON.stringify complex array', function () {
+	JSON.stringify(multiArrayComplex)
 })
 
-suites.arrayBig.add('json-fastify-json BIG array', function () {
-	fastifySchema.stringifyArray(multiArrayBig)
+suites.arrayComplex.add('json-hardwire complex array', function () {
+	HWSchema.stringifyArray(multiArrayComplex)
 })
 
-suites.arrayBig.add('json-fastify-json-uglified BIG array', function () {
-	fastifySchema.stringifyArrayUgly(multiArrayBig)
+/*suites.arrayComplex.add('json-hardwire-uglified complex array', function () {
+	HWSchema.stringifyArrayUgly(multiArrayComplex)
+})*/
+
+suites.arrayComplex.add('json-fastify-json complex array', function () {
+	fastifySchema.stringifyArray(multiArrayComplex)
 })
+
+/*suites.arrayComplex.add('json-fastify-json-uglified complex array', function () {
+	fastifySchema.stringifyArrayUgly(multiArrayComplex)
+})*/
 
 
 
@@ -166,17 +356,17 @@ suites.stringLong.add('json-hardwire long string', function () {
 	HWSchema.stringifyString(str)
 })
 
-suites.stringLong.add('json-hardwire-uglified long string', function () {
+/*suites.stringLong.add('json-hardwire-uglified long string', function () {
 	HWSchema.stringifyStringUgly(str)
-})
+})*/
 
 suites.stringLong.add('json-fastify-json long string', function () {
 	fastifySchema.stringifyString(str)
 })
 
-suites.stringLong.add('json-fastify-json-uglified long string', function () {
+/*suites.stringLong.add('json-fastify-json-uglified long string', function () {
 	fastifySchema.stringifyStringUgly(str)
-})
+})*/
 
 
 
@@ -189,17 +379,17 @@ suites.stringShort.add('json-hardwire short string', function () {
 	HWSchema.stringifyString('hello world')
 })
 
-suites.stringShort.add('json-hardwire-uglified short string', function () {
+/*suites.stringShort.add('json-hardwire-uglified short string', function () {
 	HWSchema.stringifyStringUgly('hello world')
-})
+})*/
 
 suites.stringShort.add('json-fastify-json short string', function () {
 	fastifySchema.stringifyString('hello world')
 })
 
-suites.stringShort.add('json-fastify-json-uglified short string', function () {
+/*suites.stringShort.add('json-fastify-json-uglified short string', function () {
 	fastifySchema.stringifyStringUgly('hello world')
-})
+})*/
 
 
 
@@ -212,36 +402,49 @@ suites.object.add('json-hardwire obj', function () {
 	HWSchema.stringify(obj)
 })
 
-suites.object.add('json-hardwire-uglified obj', function () {
+/*suites.object.add('json-hardwire-uglified obj', function () {
 	HWSchema.stringifyUgly(obj)
-})
+})*/
 
 suites.object.add('json-fastify-json obj', function () {
 	fastifySchema.stringify(obj)
 })
 
-suites.object.add('json-fastify-json-uglified obj', function () {
+/*suites.object.add('json-fastify-json-uglified obj', function () {
 	fastifySchema.stringifyUgly(obj)
-})
+})*/
 
 
 
 
 
 
-function run(suite){
-	suite
-		.on('cycle', function (event) {
-			console.log(String(event.target));
+async function run(suite){
+	return new Promise( (resolve, reject) => {
+
+		suite
+		.on("start", function() {
+			console.log(`Running benchmark "${this.name}"\n${"=".repeat(this.name.length + 20)}`);
+		})
+		.on("cycle", function(event) {
+			console.log("%s", String(event.target));
 		})
 		.on('complete', function () {
 			console.log(`Fastest is ${this.filter('fastest').map('name')}
 			`);
-
+			//console.log(`Fastest is ${ JSON.stringify(this.filter('fastest') ) }`);
+			resolve();	
 		})
-		.run({});
+		.run({async:true});
+		//.run();
+	})
 }
 
-for (let suite in suites){
-	run(suites[suite]);
+
+async function runAll(){
+
+	for (let suite in suites){
+		await run(suites[suite]);
+	}
 }
+runAll();

@@ -20,6 +20,7 @@
   "homepage": "https://github.com/japrescott/json-hardwire#readme",
   "devDependencies": {},
   "dependencies": {
-    "fast-json-stringify": "x.x.x"
+    "fast-json-stringify": "x.x.x",
+    "microtime": "^3.0.0"
   }
 }
