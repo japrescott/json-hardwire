@@ -129,8 +129,11 @@ function build(schema, options) {
 	return flatstr(${main});
 	`;
 
+
+	console.log( "Final Code:", code );
+
 	if (options.uglify) {
-	code = uglifyCode(code);
+		code = uglifyCode(code);
 	}
 
 	let dependencies = [];
