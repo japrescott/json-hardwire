@@ -844,7 +844,7 @@ function buildArray(schema, code, name, externalSchema, fullSchema) {
 
 		result.code += `
 		else {
-			throw new Error(\`Item at $\{i} does not match schema definition.\`)
+			throw new Error(\`Item at $\{i} does not match schema definition. For $\{JSON.stringify(obj)} \`)
 		}
 		`;
 	} else {
