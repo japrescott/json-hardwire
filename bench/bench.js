@@ -1,6 +1,7 @@
 'use strict'
 
 const HW = require('../');
+const HWOld = require('../');
 const jsonFastify = require("fast-json-stringify")
 
 const benchmark = require('benchmark')
@@ -243,6 +244,20 @@ const HWSchema = {
 	stringifyStringUgly:  HW({ type: 'hardString', uglify: true })
 };
 
+const HWSchemaOld = {
+	stringify:  HWOld(schemaHard),
+	stringifyUgly:  HWOld(schemaHard, { uglify: true }),
+	
+	stringifyArray:  HWOld(arraySchemaHard),
+	stringifyArrayUgly:  HWOld(arraySchemaHard, { uglify: true }),
+
+	stringifyArrayComplex:  HWOld(arraySchemaComplexHard),
+	stringifyArrayComplexUgly:  HWOld(arraySchemaComplexHard, { uglify: true }),
+	
+	stringifyString:  HWOld({ type: 'hardString' }),
+	stringifyStringUgly:  HWOld({ type: 'hardString', uglify: true })
+};
+
 
 const fastifySchema = {
 	stringify:  jsonFastify(schema),
@@ -266,13 +281,13 @@ const fastifySchema = {
 const suites = {};
 
 
-suites.creation = new benchmark.Suite('creation');
-suites.creation.add('json-hardwire creation', function () {
-	HW(schema)
-})
-suites.creation.add('json-fastify-json creation', function () {
-	jsonFastify(schema)
-})
+// suites.creation = new benchmark.Suite('creation');
+// suites.creation.add('json-hardwire creation', function () {
+// 	HW(schema)
+// })
+// suites.creation.add('json-fastify-json creation', function () {
+// 	jsonFastify(schema)
+// })
 
 
 
@@ -285,17 +300,25 @@ suites.array.add('json-hardwire array', function () {
 	HWSchema.stringifyArray(multiArray)
 })
 
+suites.array.add('OLD json-hardwire array', function () {
+	HWSchemaOld.stringifyArray(multiArray)
+})
+
 /*suites.array.add('json-hardwire-uglified array', function () {
 	HWSchema.stringifyArrayUgly(multiArray)
 })*/
 
-suites.array.add('json-fastify-json array', function () {
-	fastifySchema.stringifyArray(multiArray)
-})
-
-/*suites.array.add('json-fastify-json-uglified array', function () {
-	fastifySchema.stringifyArrayUgly(multiArray)
+/*suites.array.add('OLD json-hardwire-uglified array', function () {
+	HWSchemaOld.stringifyArrayUgly(multiArray)
 })*/
+
+// suites.array.add('json-fastify-json array', function () {
+// 	fastifySchema.stringifyArray(multiArray)
+// })
+
+// /*suites.array.add('json-fastify-json-uglified array', function () {
+// 	fastifySchema.stringifyArrayUgly(multiArray)
+// })*/
 
 
 
@@ -308,17 +331,25 @@ suites.arrayBig.add('json-hardwire longString array', function () {
 	HWSchema.stringifyArray(multiArrayLongString)
 })
 
+suites.arrayBig.add('OLD json-hardwire longString array', function () {
+	HWSchemaOld.stringifyArray(multiArrayLongString)
+})
+
 /*suites.arrayBig.add('json-hardwire-uglified longString array', function () {
 	HWSchema.stringifyArrayUgly(multiArrayLongString)
 })*/
 
-suites.arrayBig.add('json-fastify-json longString array', function () {
-	fastifySchema.stringifyArray(multiArrayLongString)
-})
-
-/*suites.arrayBig.add('json-fastify-json-uglified longString array', function () {
-	fastifySchema.stringifyArrayUgly(multiArrayLongString)
+/*suites.arrayBig.add('OLD json-hardwire-uglified longString array', function () {
+	HWSchemaOld.stringifyArrayUgly(multiArrayLongString)
 })*/
+
+// suites.arrayBig.add('json-fastify-json longString array', function () {
+// 	fastifySchema.stringifyArray(multiArrayLongString)
+// })
+
+// /*suites.arrayBig.add('json-fastify-json-uglified longString array', function () {
+// 	fastifySchema.stringifyArrayUgly(multiArrayLongString)
+// })*/
 
 
 
@@ -332,17 +363,25 @@ suites.arrayComplex.add('json-hardwire complex array', function () {
 	HWSchema.stringifyArray(multiArrayComplex)
 })
 
+suites.arrayComplex.add('OLD json-hardwire complex array', function () {
+	HWSchemaOld.stringifyArray(multiArrayComplex)
+})
+
 /*suites.arrayComplex.add('json-hardwire-uglified complex array', function () {
 	HWSchema.stringifyArrayUgly(multiArrayComplex)
 })*/
 
-suites.arrayComplex.add('json-fastify-json complex array', function () {
-	fastifySchema.stringifyArray(multiArrayComplex)
-})
-
-/*suites.arrayComplex.add('json-fastify-json-uglified complex array', function () {
-	fastifySchema.stringifyArrayUgly(multiArrayComplex)
+/*suites.arrayComplex.add('OLD json-hardwire-uglified complex array', function () {
+	HWSchemaOld.stringifyArrayUgly(multiArrayComplex)
 })*/
+
+// suites.arrayComplex.add('json-fastify-json complex array', function () {
+// 	fastifySchema.stringifyArray(multiArrayComplex)
+// })
+
+// /*suites.arrayComplex.add('json-fastify-json-uglified complex array', function () {
+// 	fastifySchema.stringifyArrayUgly(multiArrayComplex)
+// })*/
 
 
 
@@ -356,17 +395,25 @@ suites.stringLong.add('json-hardwire long string', function () {
 	HWSchema.stringifyString(str)
 })
 
+suites.stringLong.add('OLD json-hardwire long string', function () {
+	HWSchemaOld.stringifyString(str)
+})
+
 /*suites.stringLong.add('json-hardwire-uglified long string', function () {
 	HWSchema.stringifyStringUgly(str)
 })*/
 
-suites.stringLong.add('json-fastify-json long string', function () {
-	fastifySchema.stringifyString(str)
-})
-
-/*suites.stringLong.add('json-fastify-json-uglified long string', function () {
-	fastifySchema.stringifyStringUgly(str)
+/*suites.stringLong.add('OLD json-hardwire-uglified long string', function () {
+	HWSchemaOld.stringifyStringUgly(str)
 })*/
+
+// suites.stringLong.add('json-fastify-json long string', function () {
+// 	fastifySchema.stringifyString(str)
+// })
+
+// /*suites.stringLong.add('json-fastify-json-uglified long string', function () {
+// 	fastifySchema.stringifyStringUgly(str)
+// })*/
 
 
 
@@ -379,17 +426,25 @@ suites.stringShort.add('json-hardwire short string', function () {
 	HWSchema.stringifyString('hello world')
 })
 
+suites.stringShort.add('OLD json-hardwire short string', function () {
+	HWSchemaOld.stringifyString('hello world')
+})
+
 /*suites.stringShort.add('json-hardwire-uglified short string', function () {
 	HWSchema.stringifyStringUgly('hello world')
 })*/
 
-suites.stringShort.add('json-fastify-json short string', function () {
-	fastifySchema.stringifyString('hello world')
-})
-
-/*suites.stringShort.add('json-fastify-json-uglified short string', function () {
-	fastifySchema.stringifyStringUgly('hello world')
+/*suites.stringShort.add('OLD json-hardwire-uglified short string', function () {
+	HWSchemaOld.stringifyStringUgly('hello world')
 })*/
+
+// suites.stringShort.add('json-fastify-json short string', function () {
+// 	fastifySchema.stringifyString('hello world')
+// })
+
+// /*suites.stringShort.add('json-fastify-json-uglified short string', function () {
+// 	fastifySchema.stringifyStringUgly('hello world')
+// })*/
 
 
 
@@ -402,17 +457,25 @@ suites.object.add('json-hardwire obj', function () {
 	HWSchema.stringify(obj)
 })
 
+suites.object.add('OLD json-hardwire obj', function () {
+	HWSchemaOld.stringify(obj)
+})
+
 /*suites.object.add('json-hardwire-uglified obj', function () {
 	HWSchema.stringifyUgly(obj)
 })*/
 
-suites.object.add('json-fastify-json obj', function () {
-	fastifySchema.stringify(obj)
-})
-
-/*suites.object.add('json-fastify-json-uglified obj', function () {
-	fastifySchema.stringifyUgly(obj)
+/*suites.object.add('OLD json-hardwire-uglified obj', function () {
+	HWSchemaOld.stringifyUgly(obj)
 })*/
+
+// suites.object.add('json-fastify-json obj', function () {
+// 	fastifySchema.stringify(obj)
+// })
+
+// /*suites.object.add('json-fastify-json-uglified obj', function () {
+// 	fastifySchema.stringifyUgly(obj)
+// })*/
 
 
 
