@@ -844,7 +844,7 @@ function buildArray(schema, code, name, externalSchema, fullSchema) {
 
 		result.code += `
 		else {
-			throw new Error(\`Item at $\{i} does not match schema definition. For $\{JSON.stringify(obj)} \`)
+			throw new Error(\`Item at $\{i} does not match schema definition. For $\{JSON.stringify(obj)}. Was $\{obj[i]} -> $\{typeof obj[i] } \`)
 		}
 		`;
 	} else {
@@ -909,9 +909,11 @@ function buildArrayTypeCondition(type, accessor) {
 	case "array":
 		condition = `Array.isArray(obj${accessor})`;
 		break;
+
 	case "hardFloat":
 		condition = `typeof obj${accessor} === 'number' && Number(obj${accessor}) === obj${accessor} && obj${accessor} % 1 !== 0;`;
 		break;
+
 	default:
 		if (Array.isArray(type)) {
 			let conditions = type.map(subType => {
