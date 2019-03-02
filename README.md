@@ -1,10 +1,10 @@
-###json-hardwire:
+### json-hardwire:
 
 this is a fork of __fast-json-stringify__ that is highly optimized for speed and unforgiving if your json doesnt match the schema. it is also json-schema incompatible as it adds new types for more optimizations
 
-I made this for because fast-json-stringify is not very fast when it comes to long strings and horrible, when they are nested. If you know your data, you can let json-hardwire boost the creation of the stringified object.
+I made this for because fast-json-stringify is *not* very fast when it comes to long strings and horrible, when they are nested in array/object structures. If you know your data, you can let json-hardwire boost the creation of the stringified object.
 
-see the benchmarks named `unforgiving` to see the boost
+see the benchmarks named `hardwire` to see the boost
 
 
 Unforgiving types:
@@ -18,37 +18,63 @@ Unforgiving types:
 
 
 
-Benchmarks of json-hardwire:
+## Benchmarks of json-hardwire:
+Note: JSON.stringify is the baseline
 
-Node 10.2.1:
-
-```
-JSON.stringify array x 2,759 ops/sec ±0.63% (89 runs sampled)
-json-hardwire array x 4,467 ops/sec ±1.13% (89 runs sampled)
-json-hardwire-uglified array x 4,365 ops/sec ±1.35% (88 runs sampled)
-json-hardwire array-unforgiving x 9,437,977 ops/sec ±0.80% (88 runs sampled)
-json-hardwire-uglified-unforgiving array x 9,554,308 ops/sec ±0.67% (93 runs sampled)
-
-JSON.stringify BIG array x 736 ops/sec ±0.56% (92 runs sampled)
-json-hardwire BIG array x 361 ops/sec ±0.48% (89 runs sampled)
-json-hardwire-uglified BIG array x 358 ops/sec ±0.88% (88 runs sampled)
-json-hardwire-unforgiving BIG array x 9,648,266 ops/sec ±0.54% (94 runs sampled)
-json-hardwire-uglified-unforgiving BIG array x 9,652,775 ops/sec ±0.34% (94 runs sampled)
-
-JSON.stringify long string x 8,173 ops/sec ±0.66% (94 runs sampled)
-json-hardwire long string x 8,279 ops/sec ±0.31% (94 runs sampled)
-json-hardwire-uglified long string x 8,234 ops/sec ±0.59% (92 runs sampled)
-
-JSON.stringify short string x 3,296,906 ops/sec ±0.49% (92 runs sampled)
-json-hardwire short string x 28,084,944 ops/sec ±0.34% (87 runs sampled)
-json-hardwire-uglified short string x 28,143,012 ops/sec ±0.31% (94 runs sampled)
-
-JSON.stringify obj x 1,301,020 ops/sec ±0.55% (91 runs sampled)
-json-hardwire obj x 4,497,715 ops/sec ±0.57% (91 runs sampled)
-json-hardwire-uglified obj x 4,469,555 ops/sec ±0.60% (92 runs sampled)
-
+Node 10.12.0:
 
 ```
+Running benchmark "array"
+=========================
+JSON.stringify array x 3,481 ops/sec ±4.57% (84 runs sampled) 1x
+json-hardwire array x 9,105 ops/sec ±0.32% (89 runs sampled) 2.7263565355565142x
+json-fastify-json array x 6,514 ops/sec ±3.54% (87 runs sampled) 1.8897189013023814x
+Fastest is json-hardwire array
+slowest is JSON.stringify array is 63.321%slower
+
+Running benchmark "arrayLongString"
+===================================
+JSON.stringify longString array x 1,086 ops/sec ±4.36% (85 runs sampled) 1x
+json-hardwire longString array x 11,338 ops/sec ±0.53% (89 runs sampled) 10.835003078448604x
+json-fastify-json longString array x 496 ops/sec ±1.35% (83 runs sampled) 0.4705407797725417x
+Fastest is json-hardwire longString array
+slowest is json-fastify-json longString array is 95.657%slower
+
+Running benchmark "arrayComplex"
+================================
+JSON.stringify complex array x 272 ops/sec ±5.50% (78 runs sampled) 1x
+json-hardwire complex array x 9,096 ops/sec ±0.37% (87 runs sampled) 35.15515986064193x
+json-fastify-json complex array x 6,567 ops/sec ±2.70% (90 runs sampled) 24.805482688843536x
+Fastest is json-hardwire complex array
+slowest is JSON.stringify complex array is 97.155%slower
+
+Running benchmark "stringLong"
+==============================
+JSON.stringify long string x 13,854 ops/sec ±5.24% (85 runs sampled) 1x
+json-hardwire long string x 74,361,126 ops/sec ±0.48% (88 runs sampled) 5621.549221104614x
+json-fastify-json long string x 13,640 ops/sec ±6.10% (81 runs sampled) 0.9765167621993757x
+Fastest is json-hardwire long string
+slowest is json-fastify-json long string,JSON.stringify long string is 99.983%slower
+
+Running benchmark "stringShort"
+===============================
+JSON.stringify short string x 4,045,749 ops/sec ±0.66% (92 runs sampled) 1x
+json-hardwire short string x 951,082,662 ops/sec ±0.41% (92 runs sampled) 235.6741284651254x
+json-fastify-json short string x 29,783,720 ops/sec ±0.51% (91 runs sampled) 7.37315272778112x
+json-fastify-json-uglified short string x 28,940,193 ops/sec ±2.63% (87 runs sampled) 7.016066571583278x
+Fastest is json-hardwire short string
+slowest is JSON.stringify short string is 99.576%slower
+
+Running benchmark "object"
+==========================
+JSON.stringify obj x 1,624,338 ops/sec ±2.63% (87 runs sampled) 1x
+json-hardwire obj x 11,181,532 ops/sec ±0.31% (86 runs sampled) 7.043029884363477x
+json-fastify-json obj x 6,793,823 ops/sec ±0.48% (87 runs sampled) 4.272111048912816x
+Fastest is json-hardwire obj
+slowest is JSON.stringify obj is 85.802%slower
+
+
+```
 
 
 
@@ -62,7 +88,7 @@ json-hardwire-uglified obj x 4,469,555 ops/sec ±0.60% (92 runs sampled)
 
 
 
-###OLD DOCUMENTATION:
+### OLD DOCUMENTATION:
 
 
 __fast-json-stringify__ is significantly faster than `JSON.stringify()` for small payloads. Its performance advantage shrinks as your payload grows. It pairs well with [__flatstr__](https://www.npmjs.com/package/flatstr), which triggers a V8 optimization that improves performance when eventually converting the string to a `Buffer`.
