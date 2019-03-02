@@ -1,6 +1,6 @@
 {
   "name": "json-hardwire",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Stringify your JSON at max speed by hardwiring your schema",
   "main": "index.js",
   "scripts": {

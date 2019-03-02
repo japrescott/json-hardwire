@@ -909,6 +909,9 @@ function buildArrayTypeCondition(type, accessor) {
 	case "array":
 		condition = `Array.isArray(obj${accessor})`;
 		break;
+	case "hardDate":
+		condition = `obj${accessor} && typeof obj${accessor} === 'object' && obj${accessor} instanceof Date`;
+		break;
 	case "object":
 		condition = `obj${accessor} && typeof obj${accessor} === 'object' && obj${accessor}.constructor === Object`;
 		break;
