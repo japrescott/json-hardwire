@@ -906,11 +906,11 @@ function buildArrayTypeCondition(type, accessor) {
 	case "boolean":
 		condition = `typeof obj${accessor} === 'boolean'`;
 		break;
-	case "object":
-		condition = `obj${accessor} && typeof obj${accessor} === 'object' && obj${accessor}.constructor === Object`;
-		break;
 	case "array":
 		condition = `Array.isArray(obj${accessor})`;
+		break;
+	case "object":
+		condition = `obj${accessor} && typeof obj${accessor} === 'object' && obj${accessor}.constructor === Object`;
 		break;
 
 	case "hardFloat":
