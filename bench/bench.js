@@ -422,6 +422,7 @@ function getHz(bench) {
 }
 
 async function run(suite){
+	let reference = null;
 	return new Promise( (resolve, reject) => {
 
 		suite
@@ -429,7 +430,19 @@ async function run(suite){
 			console.log(`Running benchmark "${this.name}"\n${"=".repeat(this.name.length + 20)}`);
 		})
 		.on("cycle", function(event) {
-			console.log("%s", String(event.target));
+
+			reference = reference || event.target;
+
+
+			let refHz = getHz(reference);
+
+			let hz = getHz(event.target);
+
+
+			let times  = hz / refHz;
+
+
+			console.log(`${String(event.target)} ${times}x ` );
 		})
 		.on('complete', function () {
 
@@ -444,10 +457,10 @@ async function run(suite){
 			`);
 
 
-			let hz = getHz(slowest[0]),
-			percent = (1 - (hz / fastestHz)) * 100;
+			let hz = getHz(slowest[0]);
+			let percent = (1 - (hz / fastestHz)) * 100;
 
-			console.log(`slowest is ${slowest.map('name')} is ${percent} slower`);
+			console.log(`slowest is ${slowest.map('name')} is ${percent.toFixed(3)}%slower`);
 			
 			//console.log(`Fastest is ${ JSON.stringify(fastest ) }`);
 			resolve();	
