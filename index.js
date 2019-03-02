@@ -612,7 +612,8 @@ function buildCode(schema, code, laterCode, name, externalSchema, fullSchema) {
 			key,
 			schema.properties[key],
 			externalSchema,
-			fullSchema
+			fullSchema,
+			type
 		);
 		code += result.code;
 		laterCode = result.laterCode;
@@ -1001,7 +1002,7 @@ function nested(
 
 
 	case "object":
-		funcName = '$obj' + (name + key + subKey).replace(/[-.\[\] ]/g, ""); // eslint-disable-line
+		funcName = (name + '$obj' + key + subKey).replace(/[-.\[\] ]/g, ""); // eslint-disable-line
 		laterCode = buildObject(
 			schema,
 			laterCode,
@@ -1014,7 +1015,7 @@ function nested(
 		`;
 		break;
 	case "array":
-		funcName = '$arr' + (name + key + subKey).replace(/[-.\[\] ]/g, ""); // eslint-disable-line
+		funcName = (name + '$arr' + key + subKey).replace(/[-.\[\] ]/g, ""); // eslint-disable-line
 		laterCode = buildArray(
 			schema,
 			laterCode,
