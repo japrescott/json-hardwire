@@ -148,6 +148,7 @@ function build(schema, options) {
 	dependenciesName.push("flatstr");
 
 	dependenciesName.push(code);
+	
 	return Function.apply(null, dependenciesName).apply(null, dependencies);
 }
 
